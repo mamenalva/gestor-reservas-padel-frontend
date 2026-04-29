@@ -4,11 +4,28 @@ Documentación de referencia rápida para el agente de IA sobre el proyecto fron
 
 ---
 
+## 🎨 Reglas de Diseño CSS
+
+> **IMPORTANTE**: Antes de escribir cualquier JSX con clases de estilos, consultar [`reglas_diseño.md`](./reglas_diseño.md).
+
+Ese archivo contiene el sistema visual completo del proyecto:
+- Tokens de color, tipografía y espaciado
+- Clases canónicas de cada componente DaisyUI (card, input, btn, alert, badge…)
+- Estructura de páginas privadas y públicas
+- Estados interactivos (hover, focus, disabled, error, loading)
+- Reglas de accesibilidad y responsive
+- Lista de prohibiciones (qué NO hacer)
+
+El tema activo es `padel` (definido en `src/index.css`), activado via `data-theme="padel"` en `<html>`.
+
+---
+
 ## 🛠 Tecnologías Utilizadas
 
 - **React** 19.2.5 - Librería UI
 - **Vite** 8.0.10 - Bundler y servidor de desarrollo
 - **React Router DOM** 7.x - Sistema de rutas
+- **Tailwind CSS** v4 + **DaisyUI** v5 - Sistema de estilos (tema `padel`)
 - **JavaScript** (ES Modules) - Lenguaje principal
 - **Fetch API** - Cliente HTTP nativo
 - **JWT** - Autenticación (almacenado en localStorage)
@@ -361,6 +378,7 @@ Headers: Authorization: Bearer {token}
 - **Nuevo**: El token JWT se almacena automáticamente en `localStorage` tras login/registro
 - **Nuevo**: El navbar es responsive y muestra información del usuario autenticado
 - Actualiza este archivo con cada nueva implementación de código que sea relevante (nuevas páginas, uso nuevo de endpoints...)
+- Consultar `reglas_diseño.md` antes de aplicar estilos en cualquier componente o página
 
 ---
 
