@@ -8,6 +8,7 @@ Documentación de referencia rápida para el agente de IA sobre el proyecto fron
 
 - **React** 19.2.5 - Librería UI
 - **Vite** 8.0.10 - Bundler y servidor de desarrollo
+- **React Router DOM** 7.x - Sistema de rutas
 - **JavaScript** (ES Modules) - Lenguaje principal
 - **Fetch API** - Cliente HTTP nativo
 - **JWT** - Autenticación (almacenado en localStorage)
@@ -25,25 +26,39 @@ Documentación de referencia rápida para el agente de IA sobre el proyecto fron
 ```
 gestor-reservas-padel-frontend/
 ├── src/
-│   ├── App.jsx                      # Componente principal
+│   ├── App.jsx                      # Componente principal con Router
 │   ├── App.css                      # Estilos globales
 │   ├── main.jsx                     # Punto de entrada
 │   ├── index.css                    # Estilos base
 │   ├── assets/                      # Recursos estáticos (imágenes, etc.)
 │   ├── components/                  # Componentes reutilizables
+│   │   ├── Navbar.jsx               # Navbar con autenticación
 │   │   ├── FormularioPista.jsx      # Formulario para crear/editar pistas
 │   │   ├── FormularioReserva.jsx    # Formulario para crear reservas
 │   │   ├── ListadoPistas.jsx        # Lista de todas las pistas
 │   │   ├── ListadoReservas.jsx      # Lista de todas las reservas
 │   │   ├── Pista.jsx                # Componente individual de pista
-│   │   └── Reserva.jsx              # Componente individual de reserva
+│   │   ├── Reserva.jsx              # Componente individual de reserva
+│   │   └── ProtectedRoute.jsx       # Componente para proteger rutas privadas
 │   ├── context/                     # Context API (si aplica)
 │   ├── pages/                       # Páginas de la aplicación
-│   └── services/                    # Servicios de API
-│       ├── api.js                   # Cliente HTTP configurado
-│       ├── authService.js           # Servicio de autenticación
-│       ├── pistaService.js          # Servicio de pistas
-│       └── reservaService.js        # Servicio de reservas
+│   │   ├── LoginPage.jsx            # Página de login
+│   │   ├── RegistroPage.jsx         # Página de registro
+│   │   ├── HomePage.jsx             # Página de inicio pública
+│   │   ├── PistasPage.jsx           # Página de gestión de pistas (privada)
+│   │   ├── ReservasPage.jsx         # Página de gestión de reservas (privada)
+│   │   └── NotFoundPage.jsx         # Página 404
+│   ├── services/                    # Servicios de API
+│   │   ├── api.js                   # Cliente HTTP configurado
+│   │   ├── authService.js           # Servicio de autenticación
+│   │   ├── pistaService.js          # Servicio de pistas
+│   │   └── reservaService.js        # Servicio de reservas
+│   └── styles/                      # Estilos CSS modulares
+│       ├── Navbar.css               # Estilos del navbar
+│       ├── Auth.css                 # Estilos de login y registro
+│       ├── HomePage.css             # Estilos de la página de inicio
+│       ├── Pages.css                # Estilos generales de páginas
+│       └── NotFound.css             # Estilos de página 404
 ├── public/                          # Archivos estáticos
 ├── vite.config.js                   # Configuración de Vite
 ├── eslint.config.js                 # Configuración de ESLint
@@ -51,6 +66,63 @@ gestor-reservas-padel-frontend/
 ├── index.html                       # HTML principal
 └── README.md                        # Documentación general
 ```
+
+---
+
+## � Rutas Implementadas
+
+### Rutas Públicas
+
+| Ruta | Componente | Descripción |
+|------|-----------|-------------|
+| `/` | HomePage | Página de inicio con información del club |
+| `/login` | LoginPage | Formulario de autenticación |
+| `/registro` | RegistroPage | Formulario de registro de usuario |
+| `*` | NotFoundPage | Página 404 para rutas no encontradas |
+
+### Rutas Privadas (Requieren autenticación)
+
+| Ruta | Componente | Descripción |
+|------|-----------|-------------|
+| `/pistas` | PistasPage | Gestión y visualización de pistas |
+| `/reservas` | ReservasPage | Gestión de reservas |
+
+**Nota**: Las rutas privadas utilizan el componente `ProtectedRoute` que redirige automáticamente a `/login` si no hay token JWT en `localStorage`.
+
+---
+
+## 🔐 Sistema de Autenticación
+
+### Componentes de Autenticación
+
+1. **ProtectedRoute.jsx**: Componente HOC que protege rutas privadas
+   - Verifica si existe token en `localStorage`
+   - Redirige a `/login` si no está autenticado
+   - Permite el acceso si el token existe
+
+2. **Navbar.jsx**: Componente de navegación inteligente
+   - Muestra nombre del usuario cuando está autenticado
+   - Botón de logout que limpia `localStorage` y redirige a login
+   - Muestra diferentes opciones según estado de autenticación
+
+### Flujo de Autenticación
+
+1. **Registro**: 
+   - Usuario completa formulario en `/registro`
+   - Se envía POST a `/api/auth/register`
+   - Backend retorna token JWT y datos del usuario
+   - Se guardan en `localStorage` (claves: `token`, `usuario`)
+
+2. **Login**:
+   - Usuario completa formulario en `/login`
+   - Se envía POST a `/api/auth/login`
+   - Backend retorna token JWT
+   - Se guardan en `localStorage`
+
+3. **Logout**:
+   - Usuario hace clic en "Salir" del navbar
+   - Se limpian `localStorage` (token y usuario)
+   - Redirige automáticamente a `/login`
 
 ---
 
@@ -80,16 +152,19 @@ gestor-reservas-padel-frontend/
 
 **Propósito**: Gestiona el registro, login y operaciones CRUD de usuarios.
 
-**Funciones disponibles** (aproximadas):
+**Funciones disponibles**:
 
 - `register(usuario)` - Registrar nuevo usuario
 - `login(email, password)` - Autenticar usuario
+- `logout()` - Cerrar sesión y limpiar localStorage
+- `getToken()` - Obtener token del localStorage
+- `isAuthenticated()` - Verificar si hay token válido
+- `getUsuario()` - Obtener datos del usuario autenticado
 - `getAllUsuarios()` - Obtener lista de usuarios
-- `getUsuario(id)` - Obtener usuario por ID
+- `getUsuarioPorId(id)` - Obtener usuario por ID
 - `createUsuario(usuario)` - Crear nuevo usuario
 - `updateUsuario(id, usuario)` - Actualizar usuario
 - `deleteUsuario(id)` - Eliminar usuario
-- `logout()` - Cerrar sesión
 
 ---
 
@@ -99,7 +174,7 @@ gestor-reservas-padel-frontend/
 
 **Propósito**: Gestiona todas las operaciones CRUD sobre las pistas de pádel.
 
-**Funciones disponibles** (aproximadas):
+**Funciones disponibles**:
 
 - `getPistas()` - Obtener todas las pistas
 - `getPista(id)` - Obtener pista por ID
@@ -278,10 +353,13 @@ Headers: Authorization: Bearer {token}
 
 - El proyecto usa **Context API** para gestión de estado (ver carpeta `context/`)
 - Los componentes están organizados por funcionalidad en `components/`
-- Las páginas están en la carpeta `pages/` (expandir según sea necesario)
+- Las páginas están en la carpeta `pages/`
 - El cliente HTTP está centralizado en `api.js` para facilitar cambios futuros
 - Todos los servicios usan la función `api()` para consistencia
 - Los errores del backend se retornan en formato JSON con un campo `error`
+- **Nuevo**: Las rutas privadas están protegidas con `ProtectedRoute`
+- **Nuevo**: El token JWT se almacena automáticamente en `localStorage` tras login/registro
+- **Nuevo**: El navbar es responsive y muestra información del usuario autenticado
 - Actualiza este archivo con cada nueva implementación de código que sea relevante (nuevas páginas, uso nuevo de endpoints...)
 
 ---
